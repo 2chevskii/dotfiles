@@ -1,0 +1,3 @@
+[submodule "vendor/dvchevskii.windows"]
+	path = vendor/dvchevskii.windows
+	url = https://github.com/2chevskii/dvchevskii.windows.git
