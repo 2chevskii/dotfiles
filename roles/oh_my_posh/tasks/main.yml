@@ -1,0 +1,12 @@
+---
+- name: Oh My Posh | Install
+  import_tasks: windows.yml
+  when: ansible_os_family | lower == 'windows'
+- name: Oh My Posh | Create configuration directory
+  win_file:
+    path: '{{ oh_my_posh_config_dir }}'
+    state: directory
+- name: Oh My Posh | Copy configuration
+  win_copy:
+    src: config.yaml
+    dest: '{{ oh_my_posh_config_dir }}/config.yaml'

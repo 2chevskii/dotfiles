@@ -1,0 +1,5 @@
+[windows]
+172.18.96.1 ansible_port=5985
+
+[ubuntu]
+127.0.0.1

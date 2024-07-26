@@ -1,0 +1,29 @@
+---
+- name: PowerShell | Run Windows tasks
+  when: ansible_os_family | lower == 'windows'
+  import_tasks: windows.yml
+# - name: PWSH | Create directories for configuration files
+#   loop: '{{ pwsh_copy_files + pwsh_template_files }}'
+#   when: item | dirname != "."
+#   ansible.windows.win_file:
+#     path: '{{ pwsh_config_dir }}/{{ item | dirname }}'
+#     state: directory
+# - name: PWSH | Copy files
+#   loop: '{{ pwsh_copy_files }}'
+#   ansible.windows.win_copy:
+#     src: '{{ item }}'
+#     dest: '{{ pwsh_config_dir }}/{{ item }}'
+# - name: PWSH | Template files
+#   loop: '{{ pwsh_template_files }}'
+#   ansible.windows.win_template:
+#     src: '{{ item }}'
+#     dest: '{{ pwsh_config_dir }}/{{ item | replace(".j2", "") }}'
+# - name: PowerShell | Update help
+#   ansible.windows.win_powershell:
+#     script: |
+#       Update-Help
+#     args:
+#       executable: pwsh.exe
+#   tags:
+#     - powershell-help
+#     - never

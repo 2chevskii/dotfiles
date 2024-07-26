@@ -1,0 +1,15 @@
+---
+powershell_copy_files:
+  - utils/ip-utils.ps1
+  - utils/json-to-yaml.ps1
+  - utils/open.ps1
+  - utils/which.ps1
+  - utils/windows-terminal.ps1
+  - utils/apps/dnspy.ps1
+  - utils/apps/firefox.ps1
+  - env/git.ps1
+  - env/zoxide.ps1
+  - env/oh-my-posh/config.yaml
+powershell_template_files:
+  - env/oh-my-posh.ps1.j2
+powershell_resources: [DockerCompletion]

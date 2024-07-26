@@ -1,0 +1,19 @@
+---
+- name: Git | Run Windows 11 tasks
+  import_tasks: windows11.yml
+  when: ansible_distribution is match('Microsoft Windows 11*')
+- name: Git | Run Ubuntu tasks
+  import_tasks: ubuntu.yml
+  when: ansible_distribution == 'Ubuntu'
+- name: Git | Create config directory
+  ansible.windows.win_file:
+    path: '{{ git_config_dir }}'
+    state: directory
+- name: Git | Render config template
+  ansible.windows.win_template:
+    src: config.j2
+    dest: '{{ git_config_dir }}/config'
+- name: Git | Configure aliases
+  ansible.windows.win_copy:
+    src: aliases
+    dest: '{{ git_config_dir }}/aliases'

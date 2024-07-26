@@ -1,0 +1,36 @@
+---
+- name: VPN IKEv2 | Check certificate installed
+  ansible.windows.win_shell: |
+    If (Get-ChildItem -Path 'cert:' -Recurse | Where-Object -Property Subject -Like '*CN={{ vpn_ikev2_cn }}') {1} Else {0}
+  register: vpn_ikev2_certificate_installed_output
+  changed_when: false
+- name: VPN IKEv2 | Create certificates directory
+  ansible.windows.win_file:
+    path: '{{ vpn_ikev2_certs_dir }}'
+    state: directory
+- name: VPN IKEv2 | Copy certificate file
+  ansible.windows.win_copy:
+    src: '{{ vpn_ikev2_cert_name }}'
+    dest: '{{ vpn_ikev2_certs_dir }}/{{ vpn_ikev2_cert_name }}'
+    decrypt: true
+- name: VPN IKEv2 | Install certificate
+  when: vpn_ikev2_certificate_installed_output.stdout_lines[0] == '0'
+  ansible.windows.win_shell: echo '' | certutil -Silent -importpfx "{{ vpn_ikev2_certs_dir }}/{{ vpn_ikev2_cert_name }}" NoExport
+  become: true
+  changed_when: true
+- name: VPN IKEv2 | Check connection exists
+  ansible.windows.win_shell: If (Get-VpnConnection -Name '{{ vpn_ikev2_connection_name }}' -ErrorAction SilentlyContinue) {1} Else {0}
+  register: vpn_ikev2_connection_exists_output
+- name: VPN IKEv2 | Add VPN connection
+  ansible.windows.win_shell: >-
+    Add-VpnConnection -ServerAddress '{{ vpn_ikev2_host }}' -Name '{{ vpn_ikev2_connection_name }}' -TunnelType IKEv2
+    -AuthenticationMethod MachineCertificate -EncryptionLevel Required -PassThru
+  when: vpn_ikev2_connection_exists_output.stdout_lines[0] == '0'
+- name: VPN IKEv2 | Check IPSec configuration exists
+  ansible.windows.win_shell: If (Get-VpnConnection -Name '{{ vpn_ikev2_connection_name }}' | Select-Object -ExpandProperty IPsecCustomPolicy -ErrorAction SilentlyContinue) {1} Else {0}
+  register: vpn_ikev2_ipsec_configuration_exists_output
+- name: VPN IKEv2 | Set VPN connection IPSec configuration
+  ansible.windows.win_shell: >-
+    Set-VpnConnectionIPsecConfiguration -ConnectionName '{{ vpn_ikev2_connection_name }}' -AuthenticationTransformConstants GCMAES128 -CipherTransformConstants GCMAES128
+    -EncryptionMethod AES256 -IntegrityCheckMethod SHA256 -PfsGroup None -DHGroup Group14 -PassThru -Force
+  when: vpn_ikev2_ipsec_configuration_exists_output.stdout_lines[0] == '0'

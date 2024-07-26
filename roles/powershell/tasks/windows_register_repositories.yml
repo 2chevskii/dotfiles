@@ -1,0 +1,182 @@
+---
+- name: PowerShell | Register repositories
+  ansible.windows.win_powershell:
+    script: |
+      $ErrorActionPreference = 'Stop'
+
+      $repo_data = @{
+        Name                      = '{{ item.name | mandatory }}'
+        InstallationPolicy        = '{{ item.installation_policy | mandatory }}'
+        SourceLocation            = '{{ item.source_location | mandatory }}'
+        PublishLocation           = '{{ item.publish_location | mandatory }}'
+        ScriptSourceLocation      = '{{ item.script_source_location | mandatory }}'
+        ScriptPublishLocation     = '{{ item.script_publish_location | mandatory }}'
+        PackageManagementProvider = '{{ item.package_management_provider | mandatory }}'
+      }
+
+      $output = @{
+        Created           = $false
+        Updated           = $false
+        UpdatedProperties = @()
+      }
+
+      $repo = Get-PSRepository -Name $repo_data.Name -ErrorAction SilentlyContinue
+
+      Function Add-UpdatedProperty {
+        Param(
+          $name,
+          $previous_value
+        )
+
+        $output.UpdatedProperties += @{
+          Name          = $name
+          PreviousValue = $previous_value
+          CurrentValue  = $repo_data[$name]
+        }
+
+        $output.Updated = $true
+      }
+
+      If ($null -eq $repo) {
+        Write-Output 'Repository does not exist, creating...'
+        Register-PSRepository -Name $repo_data.Name `
+          -InstallationPolicy $repo_data.InstallationPolicy `
+          -SourceLocation $repo_data.SourceLocation `
+          -PublishLocation $repo_data.PublishLocation `
+          -ScriptSourceLocation $repo_data.ScriptSourceLocation `
+          -ScriptPublishLocation $repo_data.ScriptPublishLocation `
+          -PackageManagementProvider $repo_data.PackageManagementProvider
+        $output.Created = $true
+      } Else {
+        Write-Output 'Repository exists, validating configuration...'
+        If ($repo.InstallationPolicy -ne $repo_data.InstallationPolicy) {
+          Write-Output "Need to update InstallationPolicy: $($repo.InstallationPolicy) => $($repo_data.InstallationPolicy)"
+          $prev_value = $repo.InstallationPolicy
+          Set-PSRepository -Name $repo_data.Name -InstallationPolicy $repo_data.InstallationPolicy
+          Add-UpdatedProperty -name 'InstallationPolicy' -previous_value $prev_value
+        }
+
+        If ($repo.SourceLocation -ne $repo_data.SourceLocation) {
+          Write-Output "Need to update SourceLocation: $($repo.SourceLocation) => $($repo_data.SourceLocation)"
+          $prev_value = $repo.SourceLocation
+          Set-PSRepository -Name $repo_data.Name -SourceLocation $repo_data.SourceLocation
+          Add-UpdatedProperty -name 'SourceLocation' -previous_value $prev_value
+        }
+
+        If ($repo.PublishLocation -ne $repo_data.PublishLocation) {
+          Write-Output "Need to update PublishLocation: $($repo.PublishLocation) => $($repo_data.PublishLocation)"
+          $prev_value = $repo.PublishLocation
+          Set-PSRepository -Name $repo_data.Name -PublishLocation $repo_data.PublishLocation
+          Add-UpdatedProperty -name 'PublishLocation' -previous_value $prev_value
+        }
+
+        If ($repo.ScriptSourceLocation -ne $repo_data.ScriptSourceLocation) {
+          Write-Output "Need to update ScriptSourceLocation: $($repo.ScriptSourceLocation) => $($repo_data.ScriptSourceLocation)"
+          $prev_value = $repo.ScriptSourceLocation
+          Set-PSRepository -Name $repo_data.Name -ScriptSourceLocation $repo_data.ScriptSourceLocation
+          Add-UpdatedProperty -name 'ScriptSourceLocation' -previous_value $prev_value
+        }
+
+        If ($repo.ScriptPublishLocation -ne $repo_data.ScriptPublishLocation) {
+          Write-Output "Need to update ScriptPublishLocation: $($repo.ScriptPublishLocation) => $($repo_data.ScriptPublishLocation)"
+          $prev_value = $repo.ScriptPublishLocation
+          Set-PSRepository -Name $repo_data.Name -ScriptPublishLocation $repo_data.ScriptPublishLocation
+          Add-UpdatedProperty -name 'ScriptPublishLocation' -previous_value $prev_value
+        }
+
+        If ($repo.PackageManagementProvider -ne $repo_data.PackageManagementProvider) {
+          Write-Output "Need to update PackageManagementProvider: $($repo.PackageManagementProvider) => $($repo_data.PackageManagementProvider)"
+          $prev_value = $repo.PackageManagementProvider
+          Set-PSRepository -Name $repo_data.Name -PackageManagementProvider $repo_data.PackageManagementProvider
+          Add-UpdatedProperty -name 'PackageManagementProvider' -previous_value $prev_value
+        }
+      }
+
+      $Ansible.Result = $output
+      $Ansible.Changed = $output.Created -or $output.Updated
+
+  args:
+    executable: pwsh.exe
+  loop: '{{ powershell_repositories }}'
+- name: PowerShell | Register resource repositories
+  ansible.windows.win_powershell:
+    script: |
+      $ErrorActionPreference = 'Stop'
+
+      $repo_data = @{
+        Name       = '{{ item.name | mandatory }}'
+        Trusted    = {{ item.trusted | mandatory | ternary('$true', '$false') }}
+        Uri        = '{{ item.uri | mandatory }}'
+        Priority   = '{{ item.priority | mandatory }}'
+        ApiVersion = '{{ item.api_version | mandatory }}'
+      }
+
+      $output = @{
+        Created           = $false
+        Updated           = $false
+        UpdatedProperties = @()
+      }
+
+      $repo = Get-PSResourceRepository -Name $repo_data.Name -ErrorAction SilentlyContinue
+
+      Function Add-UpdatedProperty {
+        Param(
+          $name,
+          $previous_value
+        )
+
+        $output.UpdatedProperties += {
+          Name = $name
+          PreviousValue = $previous_value
+          CurrentValue = $repo_data[$name]
+        }
+
+        $output.Updated = $true
+      }
+
+      If ($null -eq $repo) {
+        Write-Output 'Repository does not exist, creating...'
+        Register-PSResourceRepository -Name $repo_data.Name `
+          -Uri $repo_data.Uri `
+          -Trusted:$repo_data.Trusted `
+          -Priority $repo_data.Priority `
+          -ApiVersion $repo_data.ApiVersion
+
+        $output.Created = $true
+      } Else {
+        Write-Output 'Repository exists, validating configuration...'
+        If ($repo.Trusted -ne $repo_data.Trusted) {
+          Write-Output "Need to update Trusted: $($repo.Trusted) => $($repo_data.Trusted)"
+          $prev_value = $repo.Trusted
+          Set-PSResourceRepository -Name $repo_data.Name -Trusted:$repo_data.Trusted
+          Add-UpdatedProperty -name 'Trusted' -previous_value $prev_value
+        }
+
+        If ($repo.ApiVersion -ne $repo_data.ApiVersion) {
+          Write-Output "Need to update ApiVersion: $($repo.ApiVersion) => $($repo_data.ApiVersion)"
+          $prev_value = $repo.ApiVersion
+          Set-PSResourceRepository -Name $repo_data.Name -ApiVersion $repo_data.ApiVersion
+          Add-UpdatedProperty -name 'ApiVersion' -previous_value $prev_value
+        }
+
+        If ($repo.Priority -ne $repo_data.Priority) {
+          Write-Output "Need to update Priority: $($repo.Priority) => $($repo_data.Priority)"
+          $prev_value = $repo.Priority
+          Set-PSResourceRepository -Name $repo_data.Name -Priority $repo_data.Priority
+          Add-UpdatedProperty -name 'Priority' -previous_value $prev_value
+        }
+
+        If ($repo.Uri -ne $repo_data.Uri) {
+          Write-Output "Need to update Uri: $($repo.Uri) => $($repo_data.Uri)"
+          $prev_value = $repo.Uri
+          Set-PSResourceRepository -Name $repo_data.Name -Uri $repo_data.Uri
+          Add-UpdatedProperty -name 'Uri' -previous_value $prev_value
+        }
+      }
+
+      $Ansible.Result = $output
+      $Ansible.Changed = $output.Created -or $output.Updated
+
+  args:
+    executable: pwsh.exe
+  loop: '{{ powershell_resource_repositories }}'

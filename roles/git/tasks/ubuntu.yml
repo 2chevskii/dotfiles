@@ -1,0 +1,4 @@
+---
+- name: Git | Ubuntu | Hello world!
+  debug:
+    msg: Hello, world (Git, Ubuntu)!

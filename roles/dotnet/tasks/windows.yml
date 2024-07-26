@@ -1,0 +1,15 @@
+---
+- name: DotNet | Install SDK
+  include_role:
+    name: winget
+  vars:
+    winget_package_id: 'Microsoft.DotNet.SDK.{{ item | split(".") | first }}'
+    winget_package_version: '{{ item }}'
+  loop: '{{ dotnet_sdk_list }}'
+- name: DotNet | Install SDK Preview
+  include_role:
+    name: winget
+  vars:
+    winget_package_id: 'Microsoft.DotNet.SDK.Preview'
+    winget_package_version: '{{ dotnet_sdk_preview_version | default("latest") }}'
+  when: dotnet_sdk_install_preview | default(False)

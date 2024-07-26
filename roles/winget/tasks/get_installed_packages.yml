@@ -1,0 +1,34 @@
+---
+- name: WinGet | Get package list export filenames
+  win_shell: |
+    [System.IO.Path]::GetTempFileName()
+    [System.IO.Path]::GetTempFileName()
+  register: winget_package_list_export_filenames
+  changed_when: false
+- name: WinGet | Export package list to file
+  win_shell: |
+    $winget_packages_raw_filename = {{ winget_package_list_export_filenames.stdout_lines[0] | quote }}
+    $winget_packages_structured_filename = {{ winget_package_list_export_filenames.stdout_lines[1] | quote }}
+    winget export --nowarn --include-versions --output "$winget_packages_raw_filename"
+    $winget_packages = [System.Collections.Generic.Dictionary[string,string]]::new()
+    Get-Content "$winget_packages_raw_filename" | ConvertFrom-Json | % { $_.Sources | % { $_.Packages | % { $winget_packages.Add($_.PackageIdentifier, $_.Version) } } }
+    $winget_packages | ConvertTo-Json | Out-File "$winget_packages_structured_filename" -Encoding ascii
+  register: winget_export_package_list_output
+  changed_when: false
+  failed_when: winget_export_package_list_output.rc != 0
+- name: WinGet | Get package list file from host
+  ansible.builtin.slurp:
+    src: '{{ winget_package_list_export_filenames.stdout_lines[1] }}'
+  register: winget_pkg_list_bin
+- name: WinGet | Cleanup temp files
+  win_file:
+    path: '{{ item }}'
+    state: absent
+  loop: '{{ winget_package_list_export_filenames.stdout_lines }}'
+  changed_when: false
+- name: Winget | Set Ansible fact with package list
+  set_fact:
+    winget_installed_packages: '{{ winget_pkg_list_bin.content | b64decode | from_json }}'
+- name: Winget | Show installed packages
+  debug:
+    var: winget_installed_packages

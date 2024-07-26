@@ -1,0 +1,5 @@
+---
+fonts_fonts:
+  - url: 'https://github.com/microsoft/cascadia-code/releases/download/v2404.23/CascadiaCode-2404.23.zip'
+    check_glob: 'CascadiaCode*-*'
+    file_filter: '*[\/]static[\/]*.otf'

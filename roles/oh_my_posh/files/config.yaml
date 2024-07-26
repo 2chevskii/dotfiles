@@ -1,0 +1,55 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/JanDeDobbeleer/oh-my-posh/main/themes/schema.json
+
+version: 2
+final_space: true
+blocks:
+  - alignment: left
+    segments:
+      - foreground: '#E36464'
+        style: plain
+        template: '@{{ .UserName }}'
+        type: session
+      - foreground: '#689d6a'
+        properties:
+          style: agnoster
+          folder_separator_icon: /
+        style: plain
+        template: ' {{ .Path }}{{ if .StackCount }} {{ .StackCount }}{{ end }}'
+        type: path
+      - foreground: '#d4879c'
+        properties:
+          branch_icon: ' '
+          fetch_upstream_icon: true
+          fetch_worktree_count: true
+          fetch_status: true
+          fetch_bare_info: true
+          fetch_stash_count: true
+          fetch_user: true
+        style: plain
+        template:
+          ' <#e7d7ad>git::{{ .UpstreamIcon }}(</>{{ .HEAD }}<#8ec07c>{{if .BranchStatus }} {{
+          .BranchStatus }}{{ end }}{{ if .Working.Changed }}  {{ .Working.String }}{{ end }}{{ if
+          and (.Working.Changed) (.Staging.Changed) }} |{{ end }}{{ if .Staging.Changed }}  {{
+          .Staging.String }}{{ end }}</><#e7d7ad>)</>'
+        type: git
+      - foreground: '#DCB977'
+        style: plain
+        template: ' '
+        type: status
+    type: prompt
+  - alignment: right
+    segments:
+      - type: dotnet
+        style: powerline
+        powerline_symbol: 
+        foreground: '#DCB977'
+        background: '#282828'
+        template:   {{ .Major }}
+      - type: time
+        style: powerline
+        powerline_symbol: 
+        foreground: '#458588'
+        background: '#282828'
+        properties:
+          time_format: 15:04:05
+    type: rprompt

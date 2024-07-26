@@ -1,0 +1,20 @@
+---
+powershell_version: latest
+powershell_config_dir: '{{ ansible_user_dir }}/.config/pwsh'
+powershell_repositories:
+  - name: PSGallery
+    installation_policy: Trusted
+    source_location: https://www.powershellgallery.com/api/v2
+    package_management_provider: NuGet
+    publish_location: https://www.powershellgallery.com/api/v2/package/
+    script_source_location: https://www.powershellgallery.com/api/v2/items/psscript
+    script_publish_location: https://www.powershellgallery.com/api/v2/package/
+powershell_resource_repositories:
+  - name: PSGallery
+    trusted: true
+    uri: https://www.powershellgallery.com/api/v2
+    priority: 50
+    api_version: v2
+powershell_resources: []
+# powershell_modules: []
+# powershell_scripts: []

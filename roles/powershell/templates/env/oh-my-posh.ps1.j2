@@ -1,0 +1,5 @@
+function Restart-OhMyPosh {
+  (& 'oh-my-posh.exe' init pwsh --config='{{ pwsh_config_dir | replace("\\", "/") }}/env/omp/config.yaml' --print) -join "`n" | Invoke-Expression
+}
+
+Restart-OhMyPosh

@@ -1,0 +1,32 @@
+---
+- name: Configure Windows host machine
+  hosts: windows
+  gather_facts: true
+  pre_tasks:
+    - name: Debug | Display Ansible facts
+      debug:
+        var: ansible_facts
+      tags: [sensitive]
+    - name: WinGet | Get installed packages
+      import_tasks: roles/winget/tasks/get_installed_packages.yml
+  tasks:
+    - name: Packages | Install additional WinGet packages
+      loop: '{{ winget_additional_packages }}'
+      include_role:
+        name: winget
+      vars:
+        winget_package_id: '{{ item }}'
+        winget_package_version: latest
+      tags: [never, packages, winget]
+    - name: Packages | Install WinGet packages which require VPN connection
+      loop: '{{ winget_requires_vpn_packages }}'
+      include_role: name=winget
+      vars:
+        winget_package_id: '{{ item }}'
+        winget_package_version: latest
+      tags: [never, requires-vpn]
+  roles:
+    - role: powershell
+    - role: nerd_fonts
+    - role: fonts
+    - role: dotnet

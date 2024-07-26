@@ -1,0 +1,11 @@
+---
+- name: Oh My Posh | Windows 11 | Install
+  include_role:
+    name: winget
+  vars:
+    winget_package_id: '{{ oh_my_posh_package_id }}'
+    winget_package_version: '{{ oh_my_posh_version }}'
+- name: Oh My Posh | Windows 11 | Render PowerShell init script template
+  ansible.windows.win_template:
+    src: pwsh-init.ps1.j2
+    dest: '{{ oh_my_posh_pwsh_init_script_path }}'

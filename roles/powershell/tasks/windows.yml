@@ -1,0 +1,11 @@
+---
+- name: PowerShell | Install latest version
+  include_role:
+    name: winget
+  vars:
+    winget_package_id: '{{ powershell_package_id }}'
+    winget_package_version: '{{ powershell_version }}'
+- name: PowerShell | Register repositories
+  import_tasks: windows_register_repositories.yml
+- name: PowerShell | Install modules
+  import_tasks: windows_install_modules.yml

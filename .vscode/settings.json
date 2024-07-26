@@ -1,0 +1,25 @@
+{
+    "ansible.python.interpreterPath": "/home/dvchevskii/dotfiles/.venv/bin/python",
+    "files.associations": {
+        ".ansible-lint": "yaml",
+        "inventory": "ini",
+        "main.yml": "ansible",
+        "**/roles/*/{tasks,handlers}/*.yml": "ansible",
+        "**/roles/*/{defaults,vars}/*.yml": "yaml",
+        "**/roles/*/meta/*.yml": "yaml",
+        "**/roles/*/templates/*.j2": "jinja",
+        "**/{group_vars,host_vars}/*/*.yml": "yaml",
+        "**/{group_vars,host_vars}/*.yml": "yaml",
+        "**/roles/git/files/aliases": "gitconfig",
+        "**/roles/git/templates/config.j2": "jinja-properties",
+    },
+    "yaml.schemas": {
+        "https://raw.githubusercontent.com/ansible/ansible-lint/main/src/ansiblelint/schemas/vars.json": [
+            "file:///home/dvchevskii/dotfiles/group_vars/wsl_host/secrets.yml",
+            "file:///home/dvchevskii/dotfiles/host_vars/172.18.96.1/secrets.yml"
+        ]
+    },
+    "yaml.customTags": [
+        "!vault"
+    ]
+}

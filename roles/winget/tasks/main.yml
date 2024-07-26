@@ -1,0 +1,60 @@
+---
+- name: WinGet | Show package to install
+  debug:
+    msg:
+      - package id={{ winget_package_id }}
+      - package version={{ winget_package_version }}
+- name: WinGet | Set currently installed package fact
+  set_fact:
+    winget_package_installed: '{{ winget_installed_packages[winget_package_id] is defined }}'
+    winget_package_installed_version: '{{ winget_installed_packages[winget_package_id] | default(None) }}'
+- name: WinGet | Fetch latest package version
+  win_shell: winget search --exact --id '{{ winget_package_id }}' | Select-String -Pattern '\s(\d+(?:\.\d+)*(?:-.+)?)\s' | Select-Object -ExpandProperty Matches -First 1 | Select-Object -ExpandProperty Groups | ? Name -eq 1 | Select-Object -ExpandProperty Value
+  register: winget_package_latest_version_output
+  changed_when: false
+- name: WinGet | Set latest package version fact
+  set_fact:
+    winget_package_latest_version: '{{ winget_package_latest_version_output.stdout_lines[0] }}'
+- name: WinGet | Set required actions facts
+  set_fact:
+    winget_package_needs_install: '{{ not winget_package_installed and winget_package_version != "absent" }}'
+    winget_package_needs_upgrade: '{{ winget_package_installed and winget_package_version != "absent" and ((winget_package_version == "latest" and winget_package_installed_version is version(winget_package_latest_version | string, "<")) or (winget_package_version != "latest" and winget_package_installed_version is version(winget_package_version | string, "<"))) }}'
+    winget_package_needs_downgrade: '{{ winget_package_installed and winget_package_version != "absent" and winget_package_version != "latest" and winget_package_installed_version is version(winget_package_version | string, ">") }}'
+    winget_package_needs_uninstall: '{{ winget_package_installed and winget_package_version == "absent" }}'
+- name: WinGet | Show package information
+  debug:
+    msg:
+      - is installed={{ winget_package_installed }}
+      - installed version={{ winget_package_installed_version }}
+      - latest version={{ winget_package_latest_version }}
+- name: WinGet | Show required actions facts
+  debug:
+    msg:
+      - 'needs install={{ winget_package_needs_install }}'
+      - 'needs upgrade={{ winget_package_needs_upgrade }}'
+      - 'needs downgrade={{ winget_package_needs_downgrade }}'
+      - 'needs uninstall={{ winget_package_needs_uninstall }}'
+- name: WinGet | Install package
+  win_shell: winget install --nowarn --exact --no-upgrade --id '{{ winget_package_id }}' --version '{{ item.version if item.version is defined and item.version != "latest" else winget_package_latest_version }}'
+  when: winget_package_needs_install
+  changed_when: true
+  notify: winget::package_installed
+- name: WinGet | Upgrade package
+  win_shell: winget upgrade --nowarn --exact --id '{{ winget_package_id }}' --version '{{ item.version if item.version is defined and item.version != "latest" else winget_package_latest_version }}'
+  when: winget_package_needs_upgrade
+  changed_when: true
+  notify: winget::package_installed
+- name: WinGet | Downgrade package
+  win_shell: |
+    winget uninstall --nowarn --exact --id '{{ winget_package_id }}'
+    winget install --nowarn --exact --no-upgrade --id '{{ winget_package_id }}' --version '{{ item.version if item.version is defined and item.version != "latest" else winget_package_latest_version }}'
+  when: winget_package_needs_downgrade
+  changed_when: true
+  notify: winget::package_installed
+- name: WinGet | Uninstall package
+  win_shell: winget uninstall --nowarn --exact --id '{{ winget_package_id }}'
+  when: winget_package_needs_uninstall
+  changed_when: true
+  notify: winget::package_removed
+- name: WinGet | Flush handlers
+  meta: flush_handlers

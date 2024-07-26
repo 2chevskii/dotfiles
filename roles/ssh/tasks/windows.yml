@@ -1,0 +1,14 @@
+---
+- name: SSH | Start ssh agent
+  ansible.windows.win_service:
+    name: ssh-agent
+    state: started
+  become: true
+- name: SSH | Save ssh keys to ssh-agent
+  ansible.windows.win_shell: |
+    ssh-add {{ item.path }}
+  loop: '{{ ssh_keys }}'
+- name: SSH | Ensure SSH public keys are generated
+  loop: '{{ ssh_keys }}'
+  ansible.windows.win_shell: |
+    openssl rsa -in {{ item.path }} -pubout -out {{ item.path }}.pub

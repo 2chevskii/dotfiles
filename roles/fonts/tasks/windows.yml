@@ -1,0 +1,84 @@
+---
+- name: Fonts | Install fonts
+  ansible.windows.win_powershell:
+    script: |
+      #Requires -Version 7
+      #Requires -PSEdition Core
+      #Requires -Modules Fonts
+
+      $ErrorActionPreference = 'Stop'
+
+      Import-Module -Name Fonts
+
+      $font_data = @{
+        Url        = '{{ item.url | mandatory }}'
+        CheckGlob  = '{{ item.check_glob | mandatory }}'
+        Global     = {{ '$true' if fonts_global_install else '$false' }}
+        FileFilter = '{{ item.file_filter | default('*') }}'
+      }
+
+      $font_data | ConvertTo-Json | Write-Output
+
+      Function Test-Installed {
+        $scope = If ($font_data.Global) {
+          'AllUsers'
+        } Else {
+          'CurrentUser'
+        }
+
+        return $null -ne (Get-Font -Name $font_data.CheckGlob -Scope $scope)
+      }
+
+      Function New-TempDirectory {
+        $temp_dir = Join-Path -Path $env:TEMP -ChildPath ([System.IO.Path]::GetRandomFileName())
+        New-Item -Path $temp_dir -ItemType Directory | Out-Null
+        Write-Verbose "Created temp directory at $temp_dir"
+        return $temp_dir
+      }
+
+      $is_installed = Test-Installed
+
+      If ($is_installed) {
+        Write-Output 'Font is already installed'
+        $Ansible.Changed = $false
+        Exit 0
+      }
+
+      Write-Output "Installing font from URL $($font_data.Url)"
+
+      $temp_dir = New-TempDirectory
+
+      $archive_name = Split-Path -Path $font_data.Url -Leaf
+
+      $archive_path = Join-Path -Path $temp_dir -ChildPath $archive_name
+
+      $font_dir = Join-Path -Path $temp_dir -ChildPath (Split-Path -Path $archive_name -LeafBase)
+
+      @{
+        TempDir     = $temp_dir
+        ArchiveName = $archive_name
+        ArchivePath = $archive_path
+        FontDir     = $font_dir
+      } | ConvertTo-Json | Write-Output
+
+      Invoke-WebRequest -Uri $font_data.Url -OutFile $archive_path
+
+      Expand-Archive -Path $archive_path -DestinationPath $font_dir
+
+      Get-ChildItem -Path $font_dir -Recurse -File | Where-Object -Property FullName -Like $font_data.FileFilter | ForEach-Object {
+        Write-Output "Installing font: $($_.FullName)"
+        $scope = If ($font_data.Global) {
+          'AllUsers'
+        } Else {
+          'CurrentUser'
+        }
+
+        Install-Font -Path $_.FullName -Scope $scope
+      }
+
+      $Ansible.Changed = $true
+
+  args:
+    executable: pwsh.exe
+  become: true
+  loop: '{{ fonts_fonts }}'

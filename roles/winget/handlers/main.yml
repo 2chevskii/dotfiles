@@ -1,0 +1,8 @@
+---
+# handlers file for winget
+- name: winget::package_installed
+  set_fact:
+    winget_installed_packages: '{{ winget_installed_packages | combine({winget_package_id: item.version if item.version is defined and item.version != "latest" else winget_package_latest_version}) }}'
+- name: winget::package_removed
+  set_fact:
+    winget_installed_packages: '{{ winget_installed_packages | ansible.utils.remove_keys(target=[winget_package_id]) }}'

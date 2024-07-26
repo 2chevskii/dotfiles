@@ -1,0 +1,5 @@
+dependencies:
+  - role: powershell
+    vars:
+      powershell_resources:
+        - Fonts

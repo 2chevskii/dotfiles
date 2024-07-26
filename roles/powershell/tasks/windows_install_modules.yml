@@ -1,0 +1,38 @@
+---
+- name: PowerShell | Install resources
+  loop: '{{ powershell_resources }}'
+  ansible.windows.win_powershell:
+    script: |
+      $ErrorActionPreference = 'Stop'
+
+      $required_resource = @{
+        Name    = '{{ item.name if item.name is defined else item }}'
+        Version = '{{ item.version if item.version is defined else "latest" }}'
+      }
+
+      $installed_resource = Get-PSResource -Name $required_resource.Name -ErrorAction SilentlyContinue
+
+      $resource_info = Find-PSResource -Name $required_resource.Name
+
+      If ($required_resource.Version -eq 'latest') {
+        $required_resource.Version = $resource_info.Version
+      } Else {
+        $required_resource.Version = [version]::Parse($required_resource.Version)
+      }
+
+      $is_installed = $null -ne $installed_resource
+
+      $Ansible.Changed = $false
+
+      If (!$is_installed) {
+        Write-Output 'Resource not installed, installing...'
+        Install-PSResource -Name $required_resource.Name -Version $required_resource.Version -Scope CurrentUser
+        $Ansible.Changed = $true
+      } ElseIf ($installed_resource.Version.CompareTo($required_resource.Version) -eq -1) {
+        Write-Output 'Resource is outdated, updating...'
+        Update-PSResource -Name $required_resource.Name -Version $required_resource.Version -Scope CurrentUser
+        $Ansible.Changed = $true
+      }
+
+  args:
+    executable: pwsh

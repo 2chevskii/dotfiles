@@ -1,0 +1,4 @@
+---
+- name: Nerd Fonts | Run Windows tasks
+  import_tasks: windows.yml
+  when: ansible_os_family | lower == 'windows'

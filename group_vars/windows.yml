@@ -1,0 +1,36 @@
+---
+ansible_connection: winrm
+ansible_winrm_transport: basic
+ansible_winrm_server_cert_validation: ignore
+ansible_become_method: runas
+ansible_become_user: '{{ ansible_user }}'
+
+nerd_fonts_clone_dir: '{{ ansible_user_dir }}/source/repos/nerd-fonts'
+
+winget_additional_packages: [
+    Telegram.TelegramDesktop,
+    7zip.7zip,
+    Mozilla.Thunderbird,
+    MongoDB.Compass.Full,
+    Guru3D.Afterburner,
+    # Guru3D.RTSS, # broken, auto installed with afterburner, yet we dont know about it
+    Valve.Steam,
+    Discord.Discord,
+    Notion.Notion,
+    Postman.Postman,
+    dnSpyEx.dnSpy,
+    OpenVPNTechnologies.OpenVPN,
+  ]
+
+winget_requires_vpn_packages: [JetBrains.Toolbox]
+
+oh_my_posh_package_id: JanDeDobbeleer.OhMyPosh
+oh_my_posh_version: 21.20.2
+
+powershell_package_id: Microsoft.PowerShell
+powershell_version: 7.4.3.0
+
+git_package_id: Git.Git
+git_version: 2.45.2
+
+dotnet_sdk_list: [7.0.410, 8.0.303]

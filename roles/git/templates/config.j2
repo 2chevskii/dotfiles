@@ -1,0 +1,25 @@
+[user]
+  name = {{ git_user_name }}
+  email = {{ git_user_email }}
+[core]
+  eol = lf
+  autocrlf = true
+  quotePath = false
+  editor = code --wait
+  sshCommand = C:/Windows/System32/OpenSSH/ssh.exe
+[init]
+  defaultBranch = master
+[diff]
+  tool = vscode
+[difftool "vscode"]
+  cmd = code --wait --diff $LOCAL $REMOTE
+[merge]
+  tool = vscode
+[mergetool "vscode"]
+  cmd = code --wait $MERGED
+[http]
+  sslBackend = openssl
+[credential]
+  helper = manager
+[include]
+  path = aliases

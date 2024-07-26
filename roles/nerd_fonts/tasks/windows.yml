@@ -1,0 +1,41 @@
+---
+- name: Nerd Fonts | Install fonts
+  ansible.windows.win_powershell:
+    script: |
+      #Requires -Version 7
+      #Requires -PSEdition Core
+      #Requires -Modules NerdFonts
+
+      $ErrorActionPreference = 'Stop'
+
+      Import-Module -Name NerdFonts
+
+      $font_data = @{
+        Name      = '{{ item.name if item.name is defined else item }}'
+        CheckGlob = '{{ item.check_glob if item.check_glob is defined else (item + '*') }}'
+        Global    = {{ '$true' if nerd_fonts_global_install else '$false' }}
+      }
+
+      $Ansible.Changed = $false
+
+      If ($font_data.Global) {
+        $is_installed = $null -ne (Get-Font -Name $font_data.CheckGlob -Scope AllUsers)
+
+        If (-not $is_installed) {
+          Write-Output 'Font not installed (Global), installing...'
+          Install-NerdFont -Name $font_data.Name -Scope AllUsers
+          $Ansible.Changed = $true
+        }
+      } Else {
+        $is_installed = $null -ne (Get-Font -Name $font_data.CheckGlob -Scope CurrentUser)
+
+        If (-not $is_installed) {
+          Write-Output 'Font not installed (User), installing...'
+          Install-NerdFont -Name $font_data.Name -Scope CurrentUser
+          $Ansible.Changed = $true
+        }
+      }
+  args:
+    executable: pwsh.exe
+  loop: '{{ nerd_fonts_fonts }}'
+  become: true

@@ -1,0 +1,9 @@
+---
+profile: production
+skip_list:
+  - name[missing]
+  - name[casing]
+  - fqcn
+  - package-latest
+  - yaml[line-length]
+  - no-free-form
