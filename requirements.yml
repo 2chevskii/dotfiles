@@ -1,0 +1,5 @@
+collections:
+  - name: dvchevskii.windows
+    source: vendor/dvchevskii.windows/dist/dvchevskii-windows-1.0.0.tar.gz
+    type: file
+    version: 1.0.0
