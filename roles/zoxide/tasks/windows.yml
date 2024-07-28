@@ -1,0 +1,13 @@
+---
+- name: ZOxide | Install
+  dvchevskii.windows.winget:
+    id: ajeetdsouza.zoxide
+    state: latest
+- name: ZOxide | Create PowerShell environment directory
+  ansible.windows.win_file:
+    path: '{{ config_dir }}/powershell/environment'
+    state: directory
+- name: ZOxide | Install PowerShell init script
+  ansible.windows.win_copy:
+    src: powershell-init.ps1
+    dest: '{{ config_dir }}/powershell/environment/zoxide.ps1'

@@ -32,3 +32,11 @@
       }
   args:
     executable: pwsh.exe
+- name: Nuke Global Tool | Create PowerShell completion directory
+  ansible.windows.win_file:
+    path: '{{ config_dir }}/powershell/completion'
+    state: directory
+- name: Nuke Global Tool | Install PowerShell completion
+  ansible.windows.win_copy:
+    src: powershell-completion.ps1
+    dest: '{{ config_dir }}/powershell/completion/nuke.ps1'

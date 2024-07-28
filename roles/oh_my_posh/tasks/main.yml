@@ -1,12 +1,15 @@
 ---
-- name: Oh My Posh | Install
+- name: Oh My Posh | Run Windows tasks
   import_tasks: windows.yml
   when: ansible_os_family | lower == 'windows'
+  tags: [windows, oh-my-posh]
 - name: Oh My Posh | Create configuration directory
-  win_file:
-    path: '{{ oh_my_posh_config_dir }}'
+  ansible.windows.win_file:
+    path: '{{ config_dir }}/oh-my-posh'
     state: directory
+  tags: oh-my-posh
 - name: Oh My Posh | Copy configuration
-  win_copy:
+  ansible.windows.win_copy:
     src: config.yaml
-    dest: '{{ oh_my_posh_config_dir }}/config.yaml'
+    dest: '{{ config_dir }}/oh-my-posh/config.yaml'
+  tags: oh-my-posh

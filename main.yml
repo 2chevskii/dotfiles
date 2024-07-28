@@ -34,6 +34,8 @@
     - role: github_cli
     - role: gitlab_cli
     - role: nuke
+    - role: zoxide
+    - role: oh_my_posh
     # - role: nerd_fonts
     # - role: fonts
     # - role: dotnet

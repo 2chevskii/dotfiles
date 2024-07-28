@@ -1,5 +1,5 @@
 ---
-- name: Docker | Run Windows tasks
+- name: ZOxide | Run Windows tasks
   import_tasks: windows.yml
   when: ansible_os_family | lower == 'windows'
-  tags: [windows, docker]
+  tags: [windows, zoxide]

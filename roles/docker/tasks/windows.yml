@@ -1,0 +1,14 @@
+---
+- name: Docker | Install Docker Desktop
+  dvchevskii.windows.winget:
+    id: Docker.DockerDesktop
+    state: present
+  become: true
+- name: Docker | Create PowerShell completion directory
+  ansible.windows.win_file:
+    path: '{{ config_dir }}/powershell/completion'
+    state: directory
+- name: Docker | Install PowerShell completion
+  ansible.windows.win_copy:
+    src: powershell-completion.ps1
+    dest: '{{ config_dir }}/powershell/completion/docker.ps1'
