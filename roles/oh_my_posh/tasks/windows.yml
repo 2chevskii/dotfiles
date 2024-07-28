@@ -1,5 +1,5 @@
 ---
-- name: Oh My Posh | Windows 11 | Install
+- name: Oh My Posh | Install
   dvchevskii.windows.winget:
     id: JanDeDobbeleer.OhMyPosh
     state: latest
@@ -11,3 +11,11 @@
   ansible.windows.win_template:
     src: powershell-init.ps1.j2
     dest: '{{ config_dir }}/powershell/environment/oh-my-posh.ps1'
+- name: Oh My Posh | Create PowerShell completion directory
+  ansible.windows.win_file:
+    path: '{{ config_dir }}/powershell/completion'
+    state: directory
+- name: Oh My Posh | Install PowerShell completion
+  ansible.windows.win_copy:
+    src: powershell-completion.ps1
+    dest: '{{ config_dir }}/powershell/completion/oh-my-posh.ps1'
