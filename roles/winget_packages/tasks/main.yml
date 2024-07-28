@@ -1,0 +1,7 @@
+---
+- name: WinGet | Install packages
+  loop: '{{ winget_package_list }}'
+  dvchevskii.windows.winget:
+    id: '{{ item.id | default(item) }}'
+    state: '{{ item.state | default(omit) }}'
+    version: '{{ item.version | default(omit) }}'

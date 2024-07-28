@@ -1,7 +1,5 @@
 ---
 - name: Git | Install latest version
-  include_role:
-    name: winget
-  vars:
-    winget_package_id: '{{ git_package_id }}'
-    winget_package_version: '{{ git_version }}'
+  dvchevskii.windows.winget:
+    id: Git.Git
+    state: present

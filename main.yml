@@ -7,26 +7,32 @@
       debug:
         var: ansible_facts
       tags: [sensitive]
-    - name: WinGet | Get installed packages
-      import_tasks: roles/winget/tasks/get_installed_packages.yml
+    # - name: WinGet | Get installed packages
+    #   import_tasks: roles/winget/tasks/get_installed_packages.yml
   tasks:
-    - name: Packages | Install additional WinGet packages
-      loop: '{{ winget_additional_packages }}'
-      include_role:
-        name: winget
-      vars:
-        winget_package_id: '{{ item }}'
-        winget_package_version: latest
-      tags: [never, packages, winget]
-    - name: Packages | Install WinGet packages which require VPN connection
-      loop: '{{ winget_requires_vpn_packages }}'
-      include_role: name=winget
-      vars:
-        winget_package_id: '{{ item }}'
-        winget_package_version: latest
-      tags: [never, requires-vpn]
+    []
+    # - name: Packages | Install additional WinGet packages
+    #   loop: '{{ winget_additional_packages }}'
+    #   include_role:
+    #     name: winget
+    #   vars:
+    #     winget_package_id: '{{ item }}'
+    #     winget_package_version: latest
+    #   tags: [never, packages, winget]
+    # - name: Packages | Install WinGet packages which require VPN connection
+    #   loop: '{{ winget_requires_vpn_packages }}'
+    #   include_role: name=winget
+    #   vars:
+    #     winget_package_id: '{{ item }}'
+    #     winget_package_version: latest
+    #   tags: [never, requires-vpn]
   roles:
+    - role: winget_packages
+    - role: git
     - role: powershell
-    - role: nerd_fonts
-    - role: fonts
     - role: dotnet
+    - role: github_cli
+    - role: gitlab_cli
+    # - role: nerd_fonts
+    # - role: fonts
+    # - role: dotnet

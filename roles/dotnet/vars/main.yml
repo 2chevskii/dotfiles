@@ -1,1 +1,9 @@
 ---
+dotnet_sdk_list:
+  [
+    dotnet-5.0-sdk-4xx,
+    dotnet-6.0-sdk-4xx,
+    dotnet-7.0-sdk-4xx,
+    dotnet-8.0-sdk-3xx,
+    dotnet-9.0-sdk-1xx,
+  ]

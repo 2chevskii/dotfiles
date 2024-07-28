@@ -1,0 +1,14 @@
+---
+- name: GitLab CLI | Install
+  chocolatey.chocolatey.win_chocolatey:
+    name: glab
+    state: present
+  become: true
+- name: GitLab CLI | Ensure PowerShell completion directory exists
+  ansible.windows.win_file:
+    path: '{{ config_dir }}/powershell/completion'
+    state: directory
+- name: GitLab CLI | Install PowerShell completion
+  ansible.windows.win_copy:
+    src: powershell-completion.ps1
+    dest: '{{ config_dir }}/powershell/completion/gitlab-cli.ps1'
