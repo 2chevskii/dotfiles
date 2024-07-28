@@ -1,5 +1,0 @@
----
-- name: Git | Install latest version
-  dvchevskii.windows.winget:
-    id: Git.Git
-    state: present

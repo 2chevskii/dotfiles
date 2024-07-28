@@ -1,7 +1,7 @@
 ---
-- name: Git | Run Windows 11 tasks
-  import_tasks: windows11.yml
-  when: ansible_distribution is match('Microsoft Windows 11*')
+- name: Git | Run Windows tasks
+  import_tasks: windows.yml
+  when: ansible_os_family | lower == 'windows'
 - name: Git | Run Ubuntu tasks
   import_tasks: ubuntu.yml
   when: ansible_distribution == 'Ubuntu'

@@ -1,0 +1,18 @@
+---
+- name: Git | Install latest version
+  dvchevskii.windows.winget:
+    id: Git.Git
+    state: present
+- name: Git | Create PowerShell environment directory
+  ansible.windows.win_file:
+    path: '{{ config_dir }}/powershell/environment'
+    state: directory
+- name: Git | Create PowerShell environment file
+  ansible.windows.win_file:
+    path: '{{ config_dir }}/powershell/environment/git.ps1'
+    state: touch
+- name: Git | Configure SSH command in PowerShell environment
+  community.windows.win_lineinfile:
+    path: '{{ config_dir }}/powershell/environment/git.ps1'
+    state: present
+    line: $env:GIT_SSH_COMMAND = 'C:/Windows/System32/OpenSSH/ssh.exe'
