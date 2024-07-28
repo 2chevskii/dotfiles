@@ -1,0 +1,34 @@
+---
+- name: Nuke Global Tool | Install
+  ansible.windows.win_powershell:
+    script: |
+      #Requires -Version 7
+
+      $ErrorActionPreference = 'Stop'
+
+      $Ansible.Changed = $false
+
+      $PackageId = 'nuke.globaltool'
+      $RequiredVersion = [semver]'{{ nuke_globaltool_version }}'
+
+      $installedVersion = dotnet tool list --global --format json | ConvertFrom-Json | Select-Object -ExpandProperty 'data' | ForEach-Object {
+        @{
+          PackageId = $_.packageId
+          Version   = $_.version
+        }
+      } | Where-Object { $_.PackageId -eq $PackageId } | Select-Object -ExpandProperty 'Version' | ForEach-Object { [semver]$_ }
+
+      $isInstalled = $null -ne $installedVersion
+      $needsUpdate = $installedVersion -lt $RequiredVersion
+
+      If (-not $isInstalled) {
+        dotnet tool install --global --version "$RequiredVersion" "$PackageId"
+
+        $Ansible.Changed = $true
+      } ElseIf ($needsUpdate) {
+        dotnet tool update --global --version "$RequiredVersion" "$PackageId"
+
+        $Ansible.Changed = $true
+      }
+  args:
+    executable: pwsh.exe

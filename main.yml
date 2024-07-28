@@ -33,6 +33,7 @@
     - role: dotnet
     - role: github_cli
     - role: gitlab_cli
+    - role: nuke
     # - role: nerd_fonts
     # - role: fonts
     # - role: dotnet
